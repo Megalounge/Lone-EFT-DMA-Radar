@@ -33,6 +33,7 @@ using LoneEftDmaRadar.Tarkov.GameWorld.Exits;
 using LoneEftDmaRadar.Tarkov.GameWorld.Explosives;
 using LoneEftDmaRadar.Tarkov.GameWorld.Loot.Helpers;
 using LoneEftDmaRadar.Tarkov.GameWorld.Player;
+using LoneEftDmaRadar.Tarkov.Unity.Structures;
 using VmmSharpEx;
 using VmmSharpEx.Extensions;
 using VmmSharpEx.Options;
@@ -58,6 +59,7 @@ namespace LoneEftDmaRadar.DMA
 
         public string MapID => Game?.MapID;
         public ulong UnityBase { get; private set; }
+        public ulong GOM { get; private set; }
         public bool Starting { get; private set; }
         public bool Ready { get; private set; }
         public bool InRaid => Game?.InRaid ?? false;
@@ -281,6 +283,7 @@ namespace LoneEftDmaRadar.DMA
             this.Starting = default;
             this.Ready = default;
             UnityBase = default;
+            GOM = default;
             _pid = default;
         }
 
@@ -308,6 +311,7 @@ namespace LoneEftDmaRadar.DMA
         {
             var unityBase = _vmm.ProcessGetModuleBase(_pid, "UnityPlayer.dll");
             unityBase.ThrowIfInvalidVirtualAddress(nameof(unityBase));
+            GOM = GameObjectManager.GetAddr(unityBase);
             UnityBase = unityBase;
         }
 

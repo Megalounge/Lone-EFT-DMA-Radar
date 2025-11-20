@@ -1,4 +1,7 @@
-﻿namespace LoneEftDmaRadar.Tarkov.Unity.Structures
+﻿using LoneEftDmaRadar.DMA;
+using VmmSharpEx;
+
+namespace LoneEftDmaRadar.Tarkov.Unity.Structures
 {
     /// <summary>
     /// Unity Game Object Manager. Contains all Game Objects.
@@ -11,39 +14,55 @@
         [FieldOffset(0x28)]
         public readonly ulong ActiveNodes; // 0x28
 
+        /// <summary>
+        /// Looks up the Address of the Game Object Manager.
+        /// </summary>
+        /// <param name="unityBase">UnityPlayer.dll module base address.</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static ulong GetAddr(ulong unityBase)
+        {
+            try
+            {
+                try
+                {
+                    const string signature = "48 89 05 ?? ?? ?? ?? 48 83 C4 ?? C3 33 C9";
+                    ulong gomSig = Memory.FindSignature(signature);
+                    gomSig.ThrowIfInvalidVirtualAddress(nameof(gomSig));
+                    uint rel = Memory.ReadValueEnsure<uint>(gomSig + 3);
+                    var gomPtr = Memory.ReadValueEnsure<VmmPointer>(gomSig + 7 + rel);
+                    gomPtr.ThrowIfInvalid();
+                    Debug.WriteLine("GOM Located via Signature.");
+                    return gomPtr;
+                }
+                catch
+                {
+                    var gomPtr = Memory.ReadValueEnsure<VmmPointer>(unityBase + UnitySDK.UnityOffsets.GameObjectManager);
+                    gomPtr.ThrowIfInvalid();
+                    Debug.WriteLine("GOM Located via Hardcoded Offset.");
+                    return gomPtr;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("ERROR Locating Game Object Manager Address", ex);
+            }
+        }
 
         /// <summary>
         /// Returns the Game Object Manager for the current UnityPlayer.
         /// </summary>
-        /// <param name="unityBase">UnityPlayer Base Addr</param>
         /// <returns>Game Object Manager</returns>
-        public static GameObjectManager Get(ulong unityBase)
+        public static GameObjectManager Get()
         {
             try
             {
-                var gomPtr = Memory.ReadPtr(unityBase + UnitySDK.UnityOffsets.GameObjectManager, false);
-                //var dump = new byte[128];
-                //Memory.ReadSpan(gomPtr - 64, dump, false);
-                //DumpBytes(dump);
-                //Environment.Exit(0);
-                return Memory.ReadValue<GameObjectManager>(gomPtr, false);
+                return Memory.ReadValueEnsure<GameObjectManager>(Memory.GOM);
             }
             catch (Exception ex)
             {
-                throw new Exception("ERROR Loading Game Object Manager", ex);
+                throw new InvalidOperationException("ERROR Reading Game Object Manager", ex);
             }
-        }
-
-        private static void DumpBytes(byte[] bytes)
-        {
-            var sb = new StringBuilder();
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                sb.Append($"{bytes[i]:X2} ");
-                if ((i + 1) % 16 == 0)
-                    sb.AppendLine();
-            }
-            Debug.WriteLine($"Bytes:\n" + sb.ToString());
         }
 
         /// <summary>
@@ -97,6 +116,7 @@
 
                             map = Memory.ReadUnicodeString(mapPtr, 128, false);
                             Debug.WriteLine("Detected Map " + map);
+                            //Debug.WriteLine(currentObject.ThisObject.ToString("X"));
                             if (!StaticGameData.MapNames.ContainsKey(map)) // Also makes sure we're not in the hideout
                                 throw new ArgumentException("Invalid Map ID!");
                             return localGameWorld;
@@ -110,7 +130,7 @@
                     currentObject = Memory.ReadValue<LinkedListObject>(currentObject.NextObjectLink); // Read next object
                 }
             }
-            return 0x0;
+            throw new InvalidOperationException("GameWorld not found.");
         }
     }
 }

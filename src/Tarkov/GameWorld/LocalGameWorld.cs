@@ -169,8 +169,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld
             try
             {
                 /// Get LocalGameWorld
-                var gom = GameObjectManager.Get(Memory.UnityBase);
-                var localGameWorld = gom.GetGameWorld(out string map);
+                var localGameWorld = GameObjectManager.Get().GetGameWorld(out string map);
                 return new LocalGameWorld(localGameWorld, map);
             }
             catch (Exception ex)
