@@ -133,17 +133,22 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld
         /// <summary>
         /// Blocks until a LocalGameWorld Singleton Instance can be instantiated.
         /// </summary>
-        public static LocalGameWorld CreateGameInstance()
+        public static LocalGameWorld CreateGameInstance(CancellationToken ct)
         {
             while (true)
             {
+                ct.ThrowIfCancellationRequested();
                 ResourceJanitor.Run();
                 Memory.ThrowIfProcessNotRunning();
                 try
                 {
-                    var instance = GetLocalGameWorld();
+                    var instance = GetLocalGameWorld(ct);
                     DebugLogger.LogDebug("Raid has started!");
                     return instance;
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
                 }
                 catch (Exception ex)
                 {
@@ -165,14 +170,18 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld
         /// Loads Local Game World resources.
         /// </summary>
         /// <returns>True if Raid has started, otherwise False.</returns>
-        private static LocalGameWorld GetLocalGameWorld()
+        private static LocalGameWorld GetLocalGameWorld(CancellationToken ct)
         {
             try
             {
                 /// Get LocalGameWorld
-                var localGameWorld = GameObjectManager.Get().GetGameWorld(out string map);
+                var localGameWorld = GameObjectManager.Get().GetGameWorld(ct, out string map);
                 if (localGameWorld == 0) throw new Exception("GameWorld Address is 0");
                 return new LocalGameWorld(localGameWorld, map);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
