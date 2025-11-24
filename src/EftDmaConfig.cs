@@ -994,6 +994,11 @@ namespace LoneEftDmaRadar
         public int KmBoxNetPort { get; set; } = 8888;
         public string KmBoxNetMac { get; set; } = "";
 
+        // FOV Circle Display
+        public bool ShowFovCircle { get; set; } = true;
+        public string FovCircleColorEngaged { get; set; } = "#FF00FF00"; // Green when engaged
+        public string FovCircleColorIdle { get; set; } = "#80FFFFFF"; // Semi-transparent white when idle
+
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum TargetingMode
         {

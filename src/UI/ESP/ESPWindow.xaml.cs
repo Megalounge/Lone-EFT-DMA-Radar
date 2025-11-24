@@ -845,12 +845,18 @@ namespace LoneEftDmaRadar.UI.ESP
         private void DrawDeviceAimbotFovCircle(Dx9RenderContext ctx, float width, float height)
         {
             var cfg = App.Config.Device;
-            if (cfg.FOV <= 0)
+            if (!cfg.ShowFovCircle || cfg.FOV <= 0)
                 return;
 
             float radius = Math.Clamp(cfg.FOV, 5f, Math.Min(width, height));
             bool engaged = MemDMA.DeviceAimbot?.IsEngaged == true;
-            var skColor = engaged ? new SKColor(0, 200, 120, 180) : new SKColor(180, 220, 255, 120);
+
+            // Parse color from config using SKColor.Parse (supports #AARRGGBB and #RRGGBB formats)
+            var colorStr = engaged ? cfg.FovCircleColorEngaged : cfg.FovCircleColorIdle;
+            var skColor = SKColor.TryParse(colorStr, out var parsed)
+                ? parsed
+                : new SKColor(255, 255, 255, 180); // Fallback to semi-transparent white
+
             ctx.DrawCircle(new RawVector2(width / 2f, height / 2f), radius, ToColor(skColor), filled: false);
         }
 

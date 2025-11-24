@@ -4,8 +4,16 @@
              xmlns:vm="clr-namespace:LoneEftDmaRadar.UI.Radar.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:LoneEftDmaRadar.UI.Converters"
+             xmlns:conv="clr-namespace:LoneEftDmaRadar.UI.Misc"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              mc:Ignorable="d"
              Padding="10">
+    <UserControl.Resources>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <conv:StringToColorConverter x:Key="StringToColorConverter" />
+    </UserControl.Resources>
+
     <d:UserControl.DataContext>
         <d:DesignInstance Type="{x:Type vm:DeviceAimbotViewModel}" IsDesignTimeCreatable="False" />
     </d:UserControl.DataContext>
@@ -16,8 +24,22 @@
             <GroupBox Header="Device Connection" Margin="0,0,12,12">
                 <StackPanel>
                     <TextBlock Text="Status:" FontWeight="Bold" Margin="8,8,8,4" />
-                    <TextBlock Text="{Binding ConnectionStatus}" Margin="8,0,8,8" />
-                    
+                    <StackPanel Orientation="Horizontal" Margin="8,0,8,8">
+                        <Ellipse Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,8,0">
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Setter Property="Fill" Value="#FFFF4444" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                            <Setter Property="Fill" Value="#FF44FF44" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
+                        </Ellipse>
+                        <TextBlock Text="{Binding ConnectionStatus}" VerticalAlignment="Center" />
+                    </StackPanel>
+
                     <TextBlock Text="Device Version:" FontWeight="Bold" Margin="8,8,8,4" />
                     <TextBlock Text="{Binding DeviceVersion}" Margin="8,0,8,8" />
                     
@@ -59,19 +81,22 @@
                                 Command="{Binding RefreshDevicesCommand}"
                                 MinWidth="120"
                                 Height="35"
-                                Margin="8,0,8,0" />
-                        
+                                Margin="8,0,8,0"
+                                IsEnabled="{Binding IsConnected, Converter={StaticResource InverseBooleanConverter}}" />
+
                         <Button Content="Connect"
                                 Command="{Binding ConnectCommand}"
                                 MinWidth="120"
                                 Height="35"
-                                Margin="8,0,8,0" />
-                        
+                                Margin="8,0,8,0"
+                                IsEnabled="{Binding IsConnected, Converter={StaticResource InverseBooleanConverter}}" />
+
                         <Button Content="Disconnect"
                                 Command="{Binding DisconnectCommand}"
                                 MinWidth="120"
                                 Height="35"
-                                Margin="8,0,8,0" />
+                                Margin="8,0,8,0"
+                                IsEnabled="{Binding IsConnected}" />
                     </WrapPanel>
                     
                     <Button Content="? Test Mouse Movement" 
@@ -143,6 +168,37 @@
                     <CheckBox Content="Enable Bullet Drop Prediction"
                               IsChecked="{Binding EnablePrediction, Mode=TwoWay}"
                               Margin="8,4,8,8" />
+
+                    <Separator Margin="8,12,8,12" />
+
+                    <CheckBox Content="Show FOV Circle on ESP"
+                              IsChecked="{Binding ShowFovCircle, Mode=TwoWay}"
+                              FontWeight="Bold"
+                              Margin="8,4,8,8" />
+
+                    <WrapPanel Margin="8,4,8,4">
+                        <TextBlock Text="FOV Circle Color (Engaged):"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"
+                                   Width="180" />
+                        <xctk:ColorPicker Width="60" Height="26"
+                                          SelectedColor="{Binding FovCircleColorEngaged, Mode=TwoWay, Converter={StaticResource StringToColorConverter}}"
+                                          UsingAlphaChannel="True"
+                                          ShowRecentColors="False"
+                                          ToolTip="Color when aimbot is actively engaged" />
+                    </WrapPanel>
+
+                    <WrapPanel Margin="8,4,8,8">
+                        <TextBlock Text="FOV Circle Color (Idle):"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"
+                                   Width="180" />
+                        <xctk:ColorPicker Width="60" Height="26"
+                                          SelectedColor="{Binding FovCircleColorIdle, Mode=TwoWay, Converter={StaticResource StringToColorConverter}}"
+                                          UsingAlphaChannel="True"
+                                          ShowRecentColors="False"
+                                          ToolTip="Color when aimbot is not engaged" />
+                    </WrapPanel>
                 </StackPanel>
             </GroupBox>
 

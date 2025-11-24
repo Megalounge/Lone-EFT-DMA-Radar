@@ -272,6 +272,25 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
             set { App.Config.Device.TargetRaider = value; OnPropertyChanged(); }
         }
 
+        // FOV Circle Display
+        public bool ShowFovCircle
+        {
+            get => App.Config.Device.ShowFovCircle;
+            set { App.Config.Device.ShowFovCircle = value; OnPropertyChanged(); }
+        }
+
+        public string FovCircleColorEngaged
+        {
+            get => App.Config.Device.FovCircleColorEngaged;
+            set { App.Config.Device.FovCircleColorEngaged = value; OnPropertyChanged(); }
+        }
+
+        public string FovCircleColorIdle
+        {
+            get => App.Config.Device.FovCircleColorIdle;
+            set { App.Config.Device.FovCircleColorIdle = value; OnPropertyChanged(); }
+        }
+
         private bool _isTesting;
         public bool IsTesting
         {
