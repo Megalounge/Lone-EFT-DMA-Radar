@@ -22,13 +22,13 @@ using CameraManagerNew = LoneEftDmaRadar.Tarkov.GameWorld.Camera.CameraManager;
 namespace LoneEftDmaRadar.UI.Misc
 {
     /// <summary>
-    /// Makcu-based hardware aimbot with ballistics prediction.
+    /// Device-based hardware aimbot (DeviceAimbot/KMBox) with ballistics prediction.
     /// </summary>
-    public sealed class MakcuAimbot : IDisposable
+    public sealed class DeviceAimbot : IDisposable
     {
         #region Fields
 
-        private static MakcuConfig Config => App.Config.Makcu;
+        private static DeviceAimbotConfig Config => App.Config.Device;
         private readonly MemDMA _memory;
         private readonly Thread _worker;
         private bool _disposed;
@@ -76,7 +76,7 @@ namespace LoneEftDmaRadar.UI.Misc
                   EProceduralAnimationMask.Breathing);
         #region Constructor / Disposal
 
-        public MakcuAimbot(MemDMA memory)
+        public DeviceAimbot(MemDMA memory)
         {
             _memory = memory;
 
@@ -90,11 +90,11 @@ namespace LoneEftDmaRadar.UI.Misc
             {
                 IsBackground = true,
                 Priority = ThreadPriority.AboveNormal,
-                Name = "MakcuAimbotWorker"
+                Name = "DeviceAimbotWorker"
             };
             _worker.Start();
 
-            DebugLogger.LogDebug("[MakcuAimbot] Started");
+            DebugLogger.LogDebug("[DeviceAimbot] Started");
         }
 
         public void Dispose()
@@ -103,7 +103,7 @@ namespace LoneEftDmaRadar.UI.Misc
             {
                 _disposed = true;
 
-                DebugLogger.LogDebug("[MakcuAimbot] Disposed");
+                DebugLogger.LogDebug("[DeviceAimbot] Disposed");
             }
         }
         public void OnRaidEnd()
@@ -153,7 +153,7 @@ namespace LoneEftDmaRadar.UI.Misc
 
                     if (!App.Config.MemWrites.MemoryAimEnabled && !Device.connected)
                     {
-                        _debugStatus = "Makcu device NOT connected (enable MemoryAim to use without device)";
+                        _debugStatus = "DeviceAimbot device NOT connected (enable MemoryAim to use without device)";
                         ResetTarget();
                         Thread.Sleep(250);
                         continue;
@@ -238,7 +238,7 @@ namespace LoneEftDmaRadar.UI.Misc
                 catch (Exception ex)
                 {
                     _debugStatus = $"Error: {ex.Message}";
-                    DebugLogger.LogDebug($"[MakcuAimbot] Error: {ex}");
+                    DebugLogger.LogDebug($"[DeviceAimbot] Error: {ex}");
                     ResetTarget();
                     Thread.Sleep(100);
                 }
@@ -329,8 +329,8 @@ namespace LoneEftDmaRadar.UI.Misc
             // Select best target based on mode
             return Config.Targeting switch
             {
-                MakcuConfig.TargetingMode.ClosestToCrosshair => candidates.MinBy(x => x.FOVDistance).Player,
-                MakcuConfig.TargetingMode.ClosestDistance => candidates.MinBy(x => x.WorldDistance).Player,
+                DeviceAimbotConfig.TargetingMode.ClosestToCrosshair => candidates.MinBy(x => x.FOVDistance).Player,
+                DeviceAimbotConfig.TargetingMode.ClosestDistance => candidates.MinBy(x => x.WorldDistance).Player,
                 _ => candidates.MinBy(x => x.FOVDistance).Player
             };
         }
@@ -341,7 +341,7 @@ private bool ShouldTargetPlayer(AbstractPlayer player, LocalPlayer localPlayer)
     bool isDebugPlayer = _dbgTotalPlayers <= 3;
     
     if (isDebugPlayer)
-        DebugLogger.LogDebug($"\n[Makcu] === Checking Player #{_dbgTotalPlayers} ===");
+        DebugLogger.LogDebug($"\n[DeviceAimbot] === Checking Player #{_dbgTotalPlayers} ===");
     
     // Don't target self
     if (player == localPlayer)
@@ -463,12 +463,12 @@ private bool ShouldTargetPlayer(AbstractPlayer player, LocalPlayer localPlayer)
             }
         }
 
-        private bool TryGetTargetBone(AbstractPlayer target, out UnityTransform boneTransform)
+        private bool TryGetTargetBone(AbstractPlayer target, Bones targetBone, out UnityTransform boneTransform)
         {
             boneTransform = null;
 
             // Closest-visible bone option
-            if (Config.TargetBone == Bones.Closest)
+            if (targetBone == Bones.Closest)
             {
                 float bestFov = float.MaxValue;
                 foreach (var candidate in target.Skeleton.BoneTransforms.Values)
@@ -489,7 +489,7 @@ private bool ShouldTargetPlayer(AbstractPlayer player, LocalPlayer localPlayer)
             }
 
             // Specific bone
-            if (target.Skeleton.BoneTransforms.TryGetValue(Config.TargetBone, out boneTransform))
+            if (target.Skeleton.BoneTransforms.TryGetValue(targetBone, out boneTransform))
                 return true;
 
             // Fallback to chest if configured bone not found
@@ -506,8 +506,12 @@ private bool ShouldTargetPlayer(AbstractPlayer player, LocalPlayer localPlayer)
             if (target.Skeleton?.BoneTransforms == null)
                 return;
 
+            var selectedBone = (App.Config.MemWrites.Enabled && App.Config.MemWrites.MemoryAimEnabled)
+                ? App.Config.MemWrites.MemoryAimTargetBone
+                : Config.TargetBone;
+
             // Get target bone position
-            if (!TryGetTargetBone(target, out var boneTransform))
+            if (!TryGetTargetBone(target, selectedBone, out var boneTransform))
                 return;
 
             Vector3 targetPos = boneTransform.Position;
@@ -522,11 +526,11 @@ private bool ShouldTargetPlayer(AbstractPlayer player, LocalPlayer localPlayer)
             if (App.Config.MemWrites.Enabled && App.Config.MemWrites.MemoryAimEnabled)
             {
                 ApplyMemoryAim(localPlayer, targetPos);
-                DebugLogger.LogDebug($"[MakcuAimbot] Using MemoryAim for target {target.Name}");
+                DebugLogger.LogDebug($"[DeviceAimbot] Using MemoryAim for target {target.Name}");
                 return;
             }
 
-            // Original Makcu device aiming (only if MemoryAim is disabled)
+            // Original DeviceAimbot device aiming (only if MemoryAim is disabled)
             // Convert to screen space
             if (!CameraManagerNew.WorldToScreen(ref targetPos, out var screenPos, false))
                 return;
@@ -555,7 +559,7 @@ private bool ShouldTargetPlayer(AbstractPlayer player, LocalPlayer localPlayer)
             if (moveX != 0 || moveY != 0)
             {
                 Device.move(moveX, moveY);
-                DebugLogger.LogDebug($"[MakcuAimbot] Aiming at target {target.Name}: Move({moveX}, {moveY})");
+                DebugLogger.LogDebug($"[DeviceAimbot] Aiming at target {target.Name}: Move({moveX}, {moveY})");
             }
         }
 private void ApplyMemoryAim(LocalPlayer localPlayer, Vector3 targetPosition)
@@ -695,7 +699,7 @@ private static float RadToDeg(float radians)
             }
             catch (Exception ex)
             {
-                DebugLogger.LogDebug($"[MakcuAimbot] Prediction failed: {ex}");
+                DebugLogger.LogDebug($"[DeviceAimbot] Prediction failed: {ex}");
                 return targetPos;
             }
         }
@@ -707,14 +711,14 @@ private static float RadToDeg(float radians)
                 var firearmManager = localPlayer.FirearmManager;
                 if (firearmManager == null)
                 {
-                    DebugLogger.LogDebug("[MakcuAimbot] FirearmManager is null");
+                    DebugLogger.LogDebug("[DeviceAimbot] FirearmManager is null");
                     return null;
                 }
 
                 var hands = firearmManager.HandsController;
                 if (hands.Item2 == false) // Not a weapon
                 {
-                    DebugLogger.LogDebug("[MakcuAimbot] HandsController is not a weapon");
+                    DebugLogger.LogDebug("[DeviceAimbot] HandsController is not a weapon");
                     return null;
                 }
 
@@ -725,7 +729,7 @@ private static float RadToDeg(float radians)
                 var ammoTemplate = FirearmManager.MagazineManager.GetAmmoTemplateFromWeapon(itemBase);
                 if (ammoTemplate == 0)
                 {
-                    DebugLogger.LogDebug("[MakcuAimbot] No ammo template found, using fallback ballistics");
+                    DebugLogger.LogDebug("[DeviceAimbot] No ammo template found, using fallback ballistics");
                     return CreateFallbackBallistics();
                 }
 
@@ -748,7 +752,7 @@ private static float RadToDeg(float radians)
 
                 if (!ballistics.IsAmmoValid)
                 {
-                    DebugLogger.LogDebug("[MakcuAimbot] Ammo ballistics invalid, using fallback ballistics");
+                    DebugLogger.LogDebug("[DeviceAimbot] Ammo ballistics invalid, using fallback ballistics");
                     return CreateFallbackBallistics();
                 }
 
@@ -756,7 +760,7 @@ private static float RadToDeg(float radians)
             }
             catch (Exception ex)
             {
-                DebugLogger.LogDebug($"[MakcuAimbot] Failed to get ballistics: {ex}. Using fallback ballistics.");
+                DebugLogger.LogDebug($"[DeviceAimbot] Failed to get ballistics: {ex}. Using fallback ballistics.");
                 return CreateFallbackBallistics();
             }
         }
@@ -860,7 +864,7 @@ private static float RadToDeg(float radians)
                 var lines = new List<string>();
 
                 // Header
-                lines.Add("=== MAKCU AIMBOT DEBUG ===");
+                lines.Add("=== DeviceAimbot AIMBOT DEBUG ===");
                 lines.Add($"Status:       {_debugStatus}");
                 lines.Add($"Key State:    {(IsEngaged ? "ENGAGED" : "Idle")}");
                 lines.Add($"Device:       {(Device.connected ? "Connected" : "Disconnected")}");
@@ -1027,14 +1031,14 @@ private static float RadToDeg(float radians)
             }
             catch (Exception ex)
             {
-                DebugLogger.LogDebug($"[MakcuAimbot] DrawDebug error: {ex}");
+                DebugLogger.LogDebug($"[DeviceAimbot] DrawDebug error: {ex}");
             }
         }
 
         /// <summary>
         /// Returns the latest debug snapshot for UI/ESP overlays.
         /// </summary>
-        public MakcuDebugSnapshot GetDebugSnapshot()
+        public DeviceAimbotDebugSnapshot GetDebugSnapshot()
         {
             try
             {
@@ -1043,7 +1047,7 @@ private static float RadToDeg(float radians)
                 if (localPlayer != null && _lockedTarget != null)
                     distanceToTarget = Vector3.Distance(localPlayer.Position, _lockedTarget.Position);
 
-                return new MakcuDebugSnapshot
+                return new DeviceAimbotDebugSnapshot
                 {
                     Status = _debugStatus,
                     KeyEngaged = IsEngaged,
@@ -1074,7 +1078,7 @@ private static float RadToDeg(float radians)
             }
             catch (Exception ex)
             {
-                DebugLogger.LogDebug($"[MakcuAimbot] GetDebugSnapshot error: {ex}");
+                DebugLogger.LogDebug($"[DeviceAimbot] GetDebugSnapshot error: {ex}");
                 return null;
             }
         }
@@ -1083,7 +1087,7 @@ private static float RadToDeg(float radians)
         
     }
 
-    public sealed class MakcuDebugSnapshot
+    public sealed class DeviceAimbotDebugSnapshot
     {
         public string Status { get; set; }
         public bool KeyEngaged { get; set; }
@@ -1100,7 +1104,7 @@ private static float RadToDeg(float radians)
 
         public float ConfigFov { get; set; }
         public float ConfigMaxDistance { get; set; }
-        public MakcuConfig.TargetingMode TargetingMode { get; set; }
+        public DeviceAimbotConfig.TargetingMode TargetingMode { get; set; }
         public Bones TargetBone { get; set; }
         public bool PredictionEnabled { get; set; }
 

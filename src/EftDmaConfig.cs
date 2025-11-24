@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Lone EFT DMA Radar
  * Brought to you by Lone (Lone DMA)
  * 
@@ -133,11 +133,11 @@ namespace LoneEftDmaRadar
         public InfoWidgetConfig InfoWidget { get; private set; } = new();
 
         /// <summary>
-        /// Settings for Makcu Aim.
+        /// Settings for Device Aimbot (DeviceAimbot/KMBox).
         /// </summary>
-        [JsonPropertyName("makcu")]
+        [JsonPropertyName("device")]
         [JsonInclude]
-        public MakcuConfig Makcu { get; private set; } = new();
+        public DeviceAimbotConfig Device { get; private set; } = new();
 
         /// <summary>
         /// Settings for memory write based features.
@@ -946,9 +946,9 @@ namespace LoneEftDmaRadar
     }
 
     /// <summary>
-    /// Settings for Makcu/Kmbox aimbot integration.
+    /// Settings for device aimbot integration (DeviceAimbot/KMBox).
     /// </summary>
-    public sealed class MakcuConfig
+    public sealed class DeviceAimbotConfig
     {
         public bool Enabled { get; set; }
         public bool AutoConnect { get; set; }
@@ -958,7 +958,7 @@ namespace LoneEftDmaRadar
         public bool ShowDebug { get; set; } = true;
 
         /// <summary>
-        /// Smoothing factor for Makcu device aim. 1 = instant, higher = slower/smoother.
+        /// Smoothing factor for DeviceAimbot device aim. 1 = instant, higher = slower/smoother.
         /// </summary>
         public float Smoothing { get; set; } = 1.0f;
 
@@ -995,6 +995,7 @@ namespace LoneEftDmaRadar
         public float NoSwayAmount { get; set; } = 80f;
         public bool InfiniteStaminaEnabled { get; set; }
         public bool MemoryAimEnabled { get; set; }
+        public Bones MemoryAimTargetBone { get; set; } = Bones.HumanHead;
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-﻿<Window x:Class="LoneEftDmaRadar.MainWindow"
+<Window x:Class="LoneEftDmaRadar.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -36,8 +36,8 @@
                     <TabItem Header="Loot Filters">
                         <tabs:LootFiltersTab x:Name="LootFilters"/>
                     </TabItem>
-                    <TabItem Header="Makcu Aimbot">
-                        <tabs:MakcuTab x:Name="Makcu" />
+                    <TabItem Header="Device Aimbot">
+                        <tabs:DeviceAimbotTab x:Name="DeviceAimbot" />
                     </TabItem>
                     <TabItem Header="MemWrites" Width="117">
                         <tabs:MemWritesTab x:Name="MemWrites" />

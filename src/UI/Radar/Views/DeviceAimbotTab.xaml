@@ -1,4 +1,4 @@
-<UserControl x:Class="LoneEftDmaRadar.UI.Radar.Views.MakcuTab"
+<UserControl x:Class="LoneEftDmaRadar.UI.Radar.Views.DeviceAimbotTab"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:LoneEftDmaRadar.UI.Radar.ViewModels"
@@ -7,7 +7,7 @@
              mc:Ignorable="d"
              Padding="10">
     <d:UserControl.DataContext>
-        <d:DesignInstance Type="{x:Type vm:MakcuViewModel}" IsDesignTimeCreatable="False" />
+        <d:DesignInstance Type="{x:Type vm:DeviceAimbotViewModel}" IsDesignTimeCreatable="False" />
     </d:UserControl.DataContext>
     
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -80,7 +80,7 @@
             <!-- Aimbot Settings -->
             <GroupBox Header="Aimbot Settings" Margin="0,0,0,12">
                 <StackPanel>
-                    <CheckBox Content="Enable Makcu Aimbot"
+                    <CheckBox Content="Enable DeviceAimbot Aimbot"
                               IsChecked="{Binding Enabled, Mode=TwoWay}"
                               FontWeight="Bold"
                               Margin="8,8,8,8" />
@@ -167,14 +167,14 @@
             <GroupBox Header="Usage" Margin="0,0,0,12">
                 <TextBlock TextWrapping="Wrap" 
                            Margin="8,8,8,8">
-                    1. Connect your Makcu device using the dropdown above<LineBreak />
+                    1. Connect your DeviceAimbot device using the dropdown above<LineBreak />
                     2. Enable the aimbot with the checkbox<LineBreak />
-                    3. Hold a configured mouse button (set on Makcu) to activate<LineBreak />
+                    3. Hold a configured mouse button (set it in SettingsTab.Hotkeys) to activate<LineBreak />
                     4. The aimbot will automatically target enemies within FOV<LineBreak />
                     <LineBreak />
-                    Note: Memory write features (No Recoil, etc.) are now in the "MemWrites" tab.<LineBreak />
+                    Note: You can enable Silentaimbot (Uses Memory Write) in MemWrites tab, it will use the same hotkey and all settings from here. Silent Aim Does not aim for you, it tells bullets where to go your gun won't move to the target bone, your bullets will.<LineBreak />
                     <LineBreak />
-                    Make sure your Makcu firmware is up to date.
+                    Make sure your DeviceAimbot firmware is up to date.
                 </TextBlock>
             </GroupBox>
         </UniformGrid>

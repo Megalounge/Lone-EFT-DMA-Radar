@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Lone EFT DMA Radar
  * Brought to you by Lone (Lone DMA)
  * 
@@ -64,7 +64,7 @@ namespace LoneEftDmaRadar.Tarkov.Unity.Structures
         HumanHead = 133,
 
         /// <summary>
-        /// Special value used by Makcu aimbot to pick the closest visible bone automatically.
+        /// Special value used by DeviceAimbot aimbot to pick the closest visible bone automatically.
         /// </summary>
         Closest = 9999
     }

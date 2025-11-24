@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Lone EFT DMA Radar
  * Brought to you by Lone (Lone DMA)
  * 
@@ -52,8 +52,8 @@ namespace LoneEftDmaRadar.DMA
     {
         #region Init
 
-        private MakcuAimbot _makcuAimbot;
-        public static MakcuAimbot MakcuAimbot { get; private set; }
+        private DeviceAimbot _deviceAimbot;
+        public static DeviceAimbot DeviceAimbot { get; private set; }
 
         private const string GAME_PROCESS_NAME = "EscapeFromTarkov.exe";
         internal const uint MAX_READ_SIZE = 0x1000u * 1500u;
@@ -200,12 +200,12 @@ namespace LoneEftDmaRadar.DMA
                         OnProcessStarted();
                         try
                         {
-                            _makcuAimbot = new MakcuAimbot(this);
-                            MakcuAimbot = _makcuAimbot;
+                            _deviceAimbot = new DeviceAimbot(this);
+                            DeviceAimbot = _deviceAimbot;
                         }
                         catch (Exception ex)
                         {
-                            DebugLogger.LogDebug($"Failed to start MakcuAimbot: {ex}");
+                            DebugLogger.LogDebug($"Failed to start DeviceAimbot: {ex}");
                         }
                         RunGameLoop();
                         OnProcessStopped();
@@ -239,15 +239,6 @@ namespace LoneEftDmaRadar.DMA
                     ResourceJanitor.Run();
                     LoadProcess();
                     LoadModules();
-                    try
-                    {
-                        CameraManager = new CameraManagerNew();
-                        CameraManagerNew.UpdateViewportRes();
-                    }
-                    catch (Exception ex)
-                    {
-                        DebugLogger.LogDebug($"Process Startup [WARN]: failed to init CameraManager - {ex}");
-                    }
                     this.Starting = true;
                     OnProcessStarting();
                     this.Ready = true;
@@ -274,13 +265,51 @@ namespace LoneEftDmaRadar.DMA
                 try
                 {
                     var ct = Restart;
+
                     using (var game = Game = LocalGameWorld.CreateGameInstance(ct))
                     {
                         OnRaidStarted();
                         game.Start();
+
+                        // Camera init timing
+                        var nextCameraAttempt = DateTime.UtcNow.AddSeconds(5); // short delay to avoid stale cameras
+                        var retryInterval = TimeSpan.FromSeconds(3);
+                        var cameraInitStart = DateTime.MinValue;
+                        var cameraInitTimeout = TimeSpan.FromSeconds(15);
+
                         while (game.InRaid)
                         {
                             ct.ThrowIfCancellationRequested();
+
+                            if (CameraManager == null && DateTime.UtcNow >= nextCameraAttempt)
+                            {
+                                try
+                                {
+                                    CameraManager = new CameraManagerNew();
+                                    CameraManagerNew.UpdateViewportRes();
+                                    DebugLogger.LogDebug("[MemDMA] CameraManager initialized for raid");
+                                    cameraInitStart = DateTime.UtcNow;
+                                }
+                                catch (Exception ex)
+                                {
+                                    DebugLogger.LogDebug($"[MemDMA] CameraManager init failed, will retry: {ex.Message}");
+                                    nextCameraAttempt = DateTime.UtcNow.Add(retryInterval);
+                                }
+                            }
+                            else if (CameraManager != null && !CameraManager.IsInitialized)
+                            {
+                                if (cameraInitStart == DateTime.MinValue)
+                                    cameraInitStart = DateTime.UtcNow;
+
+                                if (DateTime.UtcNow - cameraInitStart > cameraInitTimeout)
+                                {
+                                    DebugLogger.LogDebug("[MemDMA] CameraManager still not initialized, retrying...");
+                                    CameraManagerNew.Reset();
+                                    CameraManager = null;
+                                    nextCameraAttempt = DateTime.UtcNow.Add(retryInterval);
+                                }
+                            }
+
                             game.Refresh();
                             Thread.Sleep(133);
                         }
@@ -304,6 +333,8 @@ namespace LoneEftDmaRadar.DMA
                 finally
                 {
                     OnRaidStopped();
+                    CameraManagerNew.Reset();
+                    CameraManager = null;
                     Thread.Sleep(100);
                 }
             }
@@ -321,9 +352,9 @@ namespace LoneEftDmaRadar.DMA
             UnityBase = default;
             GOM = default;
             _pid = default;
-            _makcuAimbot?.Dispose();
-            _makcuAimbot = null;
-            MakcuAimbot = null;
+            _deviceAimbot?.Dispose();
+            _deviceAimbot = null;
+            DeviceAimbot = null;
             CameraManager = null;
         }
 
@@ -331,7 +362,7 @@ namespace LoneEftDmaRadar.DMA
         private void MemDMA_RaidStopped(object sender, EventArgs e)
         {
             Game = null;
-            _makcuAimbot?.OnRaidEnd();
+            _deviceAimbot?.OnRaidEnd();
         }
 
         /// <summary>
@@ -737,7 +768,7 @@ namespace LoneEftDmaRadar.DMA
         {
             if (Interlocked.Exchange(ref _disposed, true) == false)
             {
-                _makcuAimbot?.Dispose();
+                _deviceAimbot?.Dispose();
                 _vmm.Dispose();
             }
         }

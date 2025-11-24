@@ -312,11 +312,11 @@ namespace LoneEftDmaRadar.UI.ESP
                             DrawPlayerESP(ctx, player, localPlayer, screenWidth, screenHeight);
                         }
 
-                        DrawMakcuTargetLine(ctx, screenWidth, screenHeight);
+                        DrawDeviceAimbotTargetLine(ctx, screenWidth, screenHeight);
 
-                        if (App.Config.Makcu.Enabled)
+                        if (App.Config.Device.Enabled)
                         {
-                            DrawMakcuFovCircle(ctx, screenWidth, screenHeight);
+                            DrawDeviceAimbotFovCircle(ctx, screenWidth, screenHeight);
                         }
 
                         if (App.Config.UI.EspCrosshair)
@@ -324,7 +324,7 @@ namespace LoneEftDmaRadar.UI.ESP
                             DrawCrosshair(ctx, screenWidth, screenHeight);
                         }
 
-                        DrawMakcuDebugOverlay(ctx, screenWidth, screenHeight);
+                        DrawDeviceAimbotDebugOverlay(ctx, screenWidth, screenHeight);
                         DrawFPS(ctx, screenWidth, screenHeight);
                     }
                 }
@@ -496,8 +496,8 @@ namespace LoneEftDmaRadar.UI.ESP
 
             // Get Color
             var color = GetPlayerColorForRender(player);
-            bool isMakcuLocked = MemDMA.MakcuAimbot?.LockedTarget == player;
-            if (isMakcuLocked)
+            bool isDeviceAimbotLocked = MemDMA.DeviceAimbot?.LockedTarget == player;
+            if (isDeviceAimbotLocked)
             {
                 color = ToColor(new SKColor(0, 200, 255, 220));
             }
@@ -781,10 +781,10 @@ namespace LoneEftDmaRadar.UI.ESP
             ctx.DrawLine(new RawVector2(centerX, centerY - length), new RawVector2(centerX, centerY + length), color, _crosshairPaint.StrokeWidth);
         }
 
-        private void DrawMakcuTargetLine(Dx9RenderContext ctx, float width, float height)
+        private void DrawDeviceAimbotTargetLine(Dx9RenderContext ctx, float width, float height)
         {
-            var makcu = MemDMA.MakcuAimbot;
-            if (makcu?.LockedTarget is not { } target)
+            var DeviceAimbot = MemDMA.DeviceAimbot;
+            if (DeviceAimbot?.LockedTarget is not { } target)
                 return;
 
             var headPos = target.GetBonePos(Bones.HumanHead);
@@ -792,35 +792,35 @@ namespace LoneEftDmaRadar.UI.ESP
                 return;
 
             var center = new RawVector2(width / 2f, height / 2f);
-            bool engaged = makcu.IsEngaged;
+            bool engaged = DeviceAimbot.IsEngaged;
             var skColor = engaged ? new SKColor(0, 200, 255, 200) : new SKColor(255, 210, 0, 180);
             ctx.DrawLine(center, ToRaw(screen), ToColor(skColor), 2f);
         }
 
-        private void DrawMakcuFovCircle(Dx9RenderContext ctx, float width, float height)
+        private void DrawDeviceAimbotFovCircle(Dx9RenderContext ctx, float width, float height)
         {
-            var cfg = App.Config.Makcu;
+            var cfg = App.Config.Device;
             if (cfg.FOV <= 0)
                 return;
 
             float radius = Math.Clamp(cfg.FOV, 5f, Math.Min(width, height));
-            bool engaged = MemDMA.MakcuAimbot?.IsEngaged == true;
+            bool engaged = MemDMA.DeviceAimbot?.IsEngaged == true;
             var skColor = engaged ? new SKColor(0, 200, 120, 180) : new SKColor(180, 220, 255, 120);
             ctx.DrawCircle(new RawVector2(width / 2f, height / 2f), radius, ToColor(skColor), filled: false);
         }
 
-        private void DrawMakcuDebugOverlay(Dx9RenderContext ctx, float width, float height)
+        private void DrawDeviceAimbotDebugOverlay(Dx9RenderContext ctx, float width, float height)
         {
-            if (!App.Config.Makcu.ShowDebug)
+            if (!App.Config.Device.ShowDebug)
                 return;
 
-            var snapshot = MemDMA.MakcuAimbot?.GetDebugSnapshot();
+            var snapshot = MemDMA.DeviceAimbot?.GetDebugSnapshot();
 
             var lines = snapshot == null
-                ? new[] { "Makcu Aimbot: no data" }
+                ? new[] { "Device Aimbot: no data" }
                 : new[]
                 {
-                    "=== Makcu Aimbot ===",
+                    "=== Device Aimbot ===",
                     $"Status: {snapshot.Status}",
                     $"Key: {(snapshot.KeyEngaged ? "ENGAGED" : "Idle")} | Enabled: {snapshot.Enabled} | Device: {(snapshot.DeviceConnected ? "Connected" : "Disconnected")}",
                     $"InRaid: {snapshot.InRaid} | FOV: {snapshot.ConfigFov:F0}px | MaxDist: {snapshot.ConfigMaxDistance:F0}m | Mode: {snapshot.TargetingMode}",

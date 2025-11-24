@@ -11,7 +11,7 @@ This app has been tested on 🪟 Windows 11 25H2 (Game) and 🪟 Windows 11 23H2
 ## Features ✨
 
 - 🛰️ ESP Fuser DX9 overlay
-- 🎯 Makcu / Kmbox aimbot integration
+- 🎯 Device Aimbot / Kmbox integration
 - 🕵️‍♂️ Silent aim (memory aim)
 - 💪 No recoil, no sway, and infinite stamina
 - 🧼 Clean UI

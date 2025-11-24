@@ -12,8 +12,8 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
     public sealed class DebugTabViewModel : INotifyPropertyChanged
     {
         private readonly DispatcherTimer _timer;
-        private string _makcuDebugText = "Makcu Aimbot: (no data)";
-        private bool _showMakcuDebug = App.Config.Makcu.ShowDebug;
+        private string _DeviceAimbotDebugText = "DeviceAimbot Aimbot: (no data)";
+        private bool _showDeviceAimbotDebug = App.Config.Device.ShowDebug;
 
         public DebugTabViewModel()
         {
@@ -23,54 +23,54 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
-            _timer.Tick += (_, _) => RefreshMakcuDebug();
+            _timer.Tick += (_, _) => RefreshDeviceAimbotDebug();
             _timer.Start();
-            RefreshMakcuDebug();
+            RefreshDeviceAimbotDebug();
         }
 
         public ICommand ToggleDebugConsoleCommand { get; }
 
-        public bool ShowMakcuDebug
+        public bool ShowDeviceAimbotDebug
         {
-            get => _showMakcuDebug;
+            get => _showDeviceAimbotDebug;
             set
             {
-                if (_showMakcuDebug == value)
+                if (_showDeviceAimbotDebug == value)
                     return;
-                _showMakcuDebug = value;
-                App.Config.Makcu.ShowDebug = value;
-                OnPropertyChanged(nameof(ShowMakcuDebug));
+                _showDeviceAimbotDebug = value;
+                App.Config.Device.ShowDebug = value;
+                OnPropertyChanged(nameof(ShowDeviceAimbotDebug));
             }
         }
 
-        public string MakcuDebugText
+        public string DeviceAimbotDebugText
         {
-            get => _makcuDebugText;
+            get => _DeviceAimbotDebugText;
             private set
             {
-                if (_makcuDebugText != value)
+                if (_DeviceAimbotDebugText != value)
                 {
-                    _makcuDebugText = value;
-                    OnPropertyChanged(nameof(MakcuDebugText));
+                    _DeviceAimbotDebugText = value;
+                    OnPropertyChanged(nameof(DeviceAimbotDebugText));
                 }
             }
         }
 
-        private void RefreshMakcuDebug()
+        private void RefreshDeviceAimbotDebug()
         {
-            var snapshot = MemDMA.MakcuAimbot?.GetDebugSnapshot();
+            var snapshot = MemDMA.DeviceAimbot?.GetDebugSnapshot();
             if (snapshot == null)
             {
-                MakcuDebugText = "Makcu Aimbot: not running or no data yet.";
+                DeviceAimbotDebugText = "DeviceAimbot Aimbot: not running or no data yet.";
                 return;
             }
 
             var sb = new StringBuilder();
-            sb.AppendLine("=== Makcu Aimbot ===");
+            sb.AppendLine("=== DeviceAimbot Aimbot ===");
             sb.AppendLine($"Status: {snapshot.Status}");
             sb.AppendLine($"Key: {(snapshot.KeyEngaged ? "ENGAGED" : "Idle")} | Enabled: {snapshot.Enabled} | Device: {(snapshot.DeviceConnected ? "Connected" : "Disconnected")}");
             sb.AppendLine($"InRaid: {snapshot.InRaid} | FOV: {snapshot.ConfigFov:F0}px | MaxDist: {snapshot.ConfigMaxDistance:F0}m | Mode: {snapshot.TargetingMode}");
-            sb.AppendLine($"Filters -> PMC:{App.Config.Makcu.TargetPMC} PScav:{App.Config.Makcu.TargetPlayerScav} AI:{App.Config.Makcu.TargetAIScav} Boss:{App.Config.Makcu.TargetBoss} Raider:{App.Config.Makcu.TargetRaider}");
+            sb.AppendLine($"Filters -> PMC:{App.Config.Device.TargetPMC} PScav:{App.Config.Device.TargetPlayerScav} AI:{App.Config.Device.TargetAIScav} Boss:{App.Config.Device.TargetBoss} Raider:{App.Config.Device.TargetRaider}");
             sb.AppendLine($"Candidates: total {snapshot.CandidateTotal}, type {snapshot.CandidateTypeOk}, dist {snapshot.CandidateInDistance}, skeleton {snapshot.CandidateWithSkeleton}, w2s {snapshot.CandidateW2S}, final {snapshot.CandidateCount}");
             sb.AppendLine($"Target: {(snapshot.LockedTargetName ?? "None")} [{snapshot.LockedTargetType?.ToString() ?? "-"}] valid={snapshot.TargetValid}");
             if (snapshot.LockedTargetDistance.HasValue)
@@ -79,7 +79,7 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
             var bulletSpeedText = snapshot.BulletSpeed.HasValue ? snapshot.BulletSpeed.Value.ToString("F1") : "?";
             sb.AppendLine($"Ballistics: {(snapshot.BallisticsValid ? $"OK (Speed {bulletSpeedText} m/s, Predict {(snapshot.PredictionEnabled ? "ON" : "OFF")})" : "Invalid/None")}");
 
-            MakcuDebugText = sb.ToString();
+            DeviceAimbotDebugText = sb.ToString();
         }
 
         #region INotifyPropertyChanged

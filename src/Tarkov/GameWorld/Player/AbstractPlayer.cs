@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Lone EFT DMA Radar
  * Brought to you by Lone (Lone DMA)
  * 
@@ -218,7 +218,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
         /// </summary>
         public ConcurrentDictionary<Bones, UnityTransform> PlayerBones { get; } = new();
         /// <summary>
-        /// Lightweight wrapper for skeleton access (used by Makcu/silent aim features).
+        /// Lightweight wrapper for skeleton access (used by DeviceAimbot/silent aim features).
         /// </summary>
         public PlayerSkeleton Skeleton { get; protected set; }
         protected int _verticesCount;

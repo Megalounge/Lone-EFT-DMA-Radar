@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Lone EFT DMA Radar
  * Brought to you by Lone (Lone DMA)
  * 
@@ -19,7 +19,7 @@ namespace LoneEftDmaRadar.DMA
     /// <summary>
     /// Central input poller for hotkeys.
     /// - Primary source: VmmInputManager (Win32 keyboard/mouse via MemProcFS)
-    /// - Failsafe / secondary source: Makcu device (mouse buttons)
+    /// - Failsafe / secondary source: DeviceAimbot device (mouse buttons)
     /// </summary>
     public sealed class InputManager
     {
@@ -43,7 +43,7 @@ namespace LoneEftDmaRadar.DMA
                 // Do NOT throw; this is our failsafe.
                 _input = null;
                 DebugLogger.LogDebug($"[InputManager] Failed to initialize VmmInputManager (Win32 backend). " +
-                                $"Hotkeys will use Makcu-only fallback if available. {ex}");
+                                $"Hotkeys will use DeviceAimbot-only fallback if available. {ex}");
             }
 
             _thread = new WorkerThread
@@ -73,7 +73,7 @@ namespace LoneEftDmaRadar.DMA
                 }
                 catch (Exception ex)
                 {
-                    // If Win32 backend dies mid-run, we just fall back to Makcu.
+                    // If Win32 backend dies mid-run, we just fall back to DeviceAimbot.
                     DebugLogger.LogDebug($"[InputManager] VmmInputManager.UpdateKeys failed: {ex}");
                     // We keep _input non-null but effectively ignore it after this tick.
                     haveWin32 = false;
@@ -99,61 +99,61 @@ namespace LoneEftDmaRadar.DMA
                     }
                 }
 
-                bool isDownMakcu = IsMakcuKeyDown(vk);
+                bool isDownDeviceAimbot = IsDeviceAimbotKeyDown(vk);
 
                 // FINAL state: key is considered down if EITHER backend reports it.
-                bool isKeyDown = isDownWin32 || isDownMakcu;
+                bool isKeyDown = isDownWin32 || isDownDeviceAimbot;
 
                 action.Execute(isKeyDown);
             }
         }
 
         /// <summary>
-        /// Maps some Win32 virtual keys (mouse buttons) to Makcu buttons
-        /// and returns whether that logical key is down according to Makcu.
+        /// Maps some Win32 virtual keys (mouse buttons) to DeviceAimbot buttons
+        /// and returns whether that logical key is down according to DeviceAimbot.
         /// 
         /// This gives us:
-        /// - LBUTTON   → MakcuMouseButton.Left
-        /// - RBUTTON   → MakcuMouseButton.Right
-        /// - MBUTTON   → MakcuMouseButton.Middle
-        /// - XBUTTON1  → MakcuMouseButton.mouse4
-        /// - XBUTTON2  → MakcuMouseButton.mouse5
+        /// - LBUTTON   → DeviceAimbotMouseButton.Left
+        /// - RBUTTON   → DeviceAimbotMouseButton.Right
+        /// - MBUTTON   → DeviceAimbotMouseButton.Middle
+        /// - XBUTTON1  → DeviceAimbotMouseButton.mouse4
+        /// - XBUTTON2  → DeviceAimbotMouseButton.mouse5
         /// 
         /// So users can bind hotkeys to those keys in the hotkey UI ಮತ್ತು
         /// they will work even when VmmInputManager is unavailable, as long
-        /// as the Makcu device is connected.
+        /// as the DeviceAimbot device is connected.
         /// </summary>
-        private static bool IsMakcuKeyDown(Win32VirtualKey vk)
+        private static bool IsDeviceAimbotKeyDown(Win32VirtualKey vk)
         {
             if (!Device.connected || Device.bState == null)
                 return false;
 
-            MakcuMouseButton button;
+            DeviceAimbotMouseButton button;
 
             switch (vk)
             {
                 case Win32VirtualKey.LBUTTON:
-                    button = MakcuMouseButton.Left;
+                    button = DeviceAimbotMouseButton.Left;
                     break;
 
                 case Win32VirtualKey.RBUTTON:
-                    button = MakcuMouseButton.Right;
+                    button = DeviceAimbotMouseButton.Right;
                     break;
 
                 case Win32VirtualKey.MBUTTON:
-                    button = MakcuMouseButton.Middle;
+                    button = DeviceAimbotMouseButton.Middle;
                     break;
 
                 case Win32VirtualKey.XBUTTON1:
-                    button = MakcuMouseButton.mouse4;
+                    button = DeviceAimbotMouseButton.mouse4;
                     break;
 
                 case Win32VirtualKey.XBUTTON2:
-                    button = MakcuMouseButton.mouse5;
+                    button = DeviceAimbotMouseButton.mouse5;
                     break;
 
                 default:
-                    // any non-mouse key is not handled by Makcu
+                    // any non-mouse key is not handled by DeviceAimbot
                     return false;
             }
 

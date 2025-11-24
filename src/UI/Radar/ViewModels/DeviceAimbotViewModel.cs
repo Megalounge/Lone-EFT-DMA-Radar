@@ -16,7 +16,7 @@ using VmmSharpEx;
 
 namespace LoneEftDmaRadar.UI.Radar.ViewModels
 {
-    public sealed class MakcuViewModel : INotifyPropertyChanged
+    public sealed class DeviceAimbotViewModel : INotifyPropertyChanged
     {
         private bool _isConnected;
         private string _deviceVersion = "Not Connected";
@@ -79,20 +79,20 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
         // Settings
         public bool AutoConnect
         {
-            get => App.Config.Makcu.AutoConnect;
-            set { App.Config.Makcu.AutoConnect = value; OnPropertyChanged(); }
+            get => App.Config.Device.AutoConnect;
+            set { App.Config.Device.AutoConnect = value; OnPropertyChanged(); }
         }
 
         public float Smoothing
         {
-            get => App.Config.Makcu.Smoothing;
-            set { App.Config.Makcu.Smoothing = value; OnPropertyChanged(); }
+            get => App.Config.Device.Smoothing;
+            set { App.Config.Device.Smoothing = value; OnPropertyChanged(); }
         }
 
         public bool Enabled
         {
-            get => App.Config.Makcu.Enabled;
-            set { App.Config.Makcu.Enabled = value; OnPropertyChanged(); }
+            get => App.Config.Device.Enabled;
+            set { App.Config.Device.Enabled = value; OnPropertyChanged(); }
         }
 
         public List<Bones> AvailableBones { get; } = new List<Bones>
@@ -107,8 +107,8 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
 
         public Bones TargetBone
         {
-            get => App.Config.Makcu.TargetBone;
-            set { App.Config.Makcu.TargetBone = value; OnPropertyChanged(); }
+            get => App.Config.Device.TargetBone;
+            set { App.Config.Device.TargetBone = value; OnPropertyChanged(); }
         }
 
         public bool MemWritesEnabled
@@ -145,7 +145,7 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
                 OnPropertyChanged(nameof(IsMemWritesEnabled)); // Update dependent UI
                 
                 // Log the change
-                DebugLogger.LogDebug($"[Makcu] MemWrites {(value ? "ENABLED" : "DISABLED")}");
+                DebugLogger.LogDebug($"[DeviceAimbot] MemWrites {(value ? "ENABLED" : "DISABLED")}");
             }
         }
         
@@ -154,32 +154,32 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
 
         public float FOV
         {
-            get => App.Config.Makcu.FOV;
-            set { App.Config.Makcu.FOV = value; OnPropertyChanged(); }
+            get => App.Config.Device.FOV;
+            set { App.Config.Device.FOV = value; OnPropertyChanged(); }
         }
 
         public float MaxDistance
         {
-            get => App.Config.Makcu.MaxDistance;
-            set { App.Config.Makcu.MaxDistance = value; OnPropertyChanged(); }
+            get => App.Config.Device.MaxDistance;
+            set { App.Config.Device.MaxDistance = value; OnPropertyChanged(); }
         }
 
         public int TargetingMode
         {
-            get => (int)App.Config.Makcu.Targeting;
-            set { App.Config.Makcu.Targeting = (MakcuConfig.TargetingMode)value; OnPropertyChanged(); }
+            get => (int)App.Config.Device.Targeting;
+            set { App.Config.Device.Targeting = (DeviceAimbotConfig.TargetingMode)value; OnPropertyChanged(); }
         }
 
         public bool ShowDebug
         {
-            get => App.Config.Makcu.ShowDebug;
-            set { App.Config.Makcu.ShowDebug = value; OnPropertyChanged(); }
+            get => App.Config.Device.ShowDebug;
+            set { App.Config.Device.ShowDebug = value; OnPropertyChanged(); }
         }
 
         public bool EnablePrediction
         {
-            get => App.Config.Makcu.EnablePrediction;
-            set { App.Config.Makcu.EnablePrediction = value; OnPropertyChanged(); }
+            get => App.Config.Device.EnablePrediction;
+            set { App.Config.Device.EnablePrediction = value; OnPropertyChanged(); }
         }
 
         public bool NoRecoilEnabled
@@ -201,16 +201,16 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
         }        
 
         /// <summary>
-        /// True while Makcu aimbot is actively engaged (aim-key/ hotkey).
+        /// True while Device Aimbot is actively engaged (aim-key/ hotkey).
         /// </summary>
         public bool IsEngaged
         {
-            get => MemDMA.MakcuAimbot?.IsEngaged ?? false;
+            get => MemDMA.DeviceAimbot?.IsEngaged ?? false;
             set
             {
-                if (MemDMA.MakcuAimbot != null)
+                if (MemDMA.DeviceAimbot != null)
                 {
-                    MemDMA.MakcuAimbot.IsEngaged = value;
+                    MemDMA.DeviceAimbot.IsEngaged = value;
                     OnPropertyChanged();
                 }
             }
@@ -219,32 +219,32 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
         // Target Filters
         public bool TargetPMC
         {
-            get => App.Config.Makcu.TargetPMC;
-            set { App.Config.Makcu.TargetPMC = value; OnPropertyChanged(); }
+            get => App.Config.Device.TargetPMC;
+            set { App.Config.Device.TargetPMC = value; OnPropertyChanged(); }
         }
 
         public bool TargetPlayerScav
         {
-            get => App.Config.Makcu.TargetPlayerScav;
-            set { App.Config.Makcu.TargetPlayerScav = value; OnPropertyChanged(); }
+            get => App.Config.Device.TargetPlayerScav;
+            set { App.Config.Device.TargetPlayerScav = value; OnPropertyChanged(); }
         }
 
         public bool TargetAIScav
         {
-            get => App.Config.Makcu.TargetAIScav;
-            set { App.Config.Makcu.TargetAIScav = value; OnPropertyChanged(); }
+            get => App.Config.Device.TargetAIScav;
+            set { App.Config.Device.TargetAIScav = value; OnPropertyChanged(); }
         }
 
         public bool TargetBoss
         {
-            get => App.Config.Makcu.TargetBoss;
-            set { App.Config.Makcu.TargetBoss = value; OnPropertyChanged(); }
+            get => App.Config.Device.TargetBoss;
+            set { App.Config.Device.TargetBoss = value; OnPropertyChanged(); }
         }
 
         public bool TargetRaider
         {
-            get => App.Config.Makcu.TargetRaider;
-            set { App.Config.Makcu.TargetRaider = value; OnPropertyChanged(); }
+            get => App.Config.Device.TargetRaider;
+            set { App.Config.Device.TargetRaider = value; OnPropertyChanged(); }
         }
 
         private bool _isTesting;
@@ -258,7 +258,7 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
             }
         }
 
-        public MakcuViewModel()
+        public DeviceAimbotViewModel()
         {
             ConnectCommand = new SimpleCommand(Connect);
             DisconnectCommand = new SimpleCommand(Disconnect);
@@ -267,22 +267,22 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
 
             RefreshDevices();
 
-            // Auto-connect if enabled (Makcu VID/PID-based)
-            if (App.Config.Makcu.AutoConnect)
+            // Auto-connect if enabled (Device Aimbot VID/PID-based)
+            if (App.Config.Device.AutoConnect)
             {
                 System.Threading.Tasks.Task.Run(() =>
                 {
                     System.Threading.Thread.Sleep(1000);
-                    if (Device.TryAutoConnect(App.Config.Makcu.LastComPort))
+                    if (Device.TryAutoConnect(App.Config.Device.LastComPort))
                     {
                         UpdateConnectionStatus();
-                        if (!string.IsNullOrWhiteSpace(App.Config.Makcu.LastComPort))
+                        if (!string.IsNullOrWhiteSpace(App.Config.Device.LastComPort))
                             return;
 
                         try
                         {
                             // If we found a port through detection, remember it.
-                            App.Config.Makcu.LastComPort = Device.CurrentPortName;
+                            App.Config.Device.LastComPort = Device.CurrentPortName;
                         }
                         catch { /* ignore */ }
                     }
@@ -297,9 +297,9 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
                 AvailableDevices = Device.EnumerateSerialDevices();
                 
                 // Try to select last used device
-                if (!string.IsNullOrEmpty(App.Config.Makcu.LastComPort))
+                if (!string.IsNullOrEmpty(App.Config.Device.LastComPort))
                 {
-                    SelectedDevice = AvailableDevices.FirstOrDefault(d => d.Port == App.Config.Makcu.LastComPort)
+                    SelectedDevice = AvailableDevices.FirstOrDefault(d => d.Port == App.Config.Device.LastComPort)
                                      ?? AvailableDevices.FirstOrDefault();
                 }
                 else
@@ -321,20 +321,20 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
                 {
                     System.Windows.MessageBox.Show(
                         "Please select a device first.",
-                        "Makcu",
+                        "Device Aimbot",
                         System.Windows.MessageBoxButton.OK,
                         System.Windows.MessageBoxImage.Warning);
                     return;
                 }
 
                 // Auto device-type connect:
-                // 1) Try Makcu (4M baud + change_cmd + km.MAKCU)
+                // 1) Try Device Aimbot (4M baud + change_cmd + km.DeviceAimbot)
                 // 2) Fall back to generic km.* device (KMBox/CH340 at 115200)
                 bool ok = Device.ConnectAuto(SelectedDevice.Port);
 
                 if (ok && Device.connected)
                 {
-                    App.Config.Makcu.LastComPort = SelectedDevice.Port;
+                    App.Config.Device.LastComPort = SelectedDevice.Port;
                     UpdateConnectionStatus();
                 }
                 else
@@ -343,7 +343,7 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
                     System.Windows.MessageBox.Show(
                         "Failed to connect to device.\n\n" +
                         "If you are using a KMBox / CH340-based device, make sure it is in km.* mode.",
-                        "Makcu / KM Device",
+                        "Device Aimbot / KM Device",
                         System.Windows.MessageBoxButton.OK,
                         System.Windows.MessageBoxImage.Error);
                 }
@@ -352,7 +352,7 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
             {
                 System.Windows.MessageBox.Show(
                     $"Connection error: {ex.Message}",
-                    "Makcu",
+                    "Device Aimbot",
                     System.Windows.MessageBoxButton.OK,
                     System.Windows.MessageBoxImage.Error);
             }
@@ -426,7 +426,7 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
                     int step = 50;  // pixels
                     int delay = 200; // ms
 
-                    DebugLogger.LogDebug("[MakcuTest] Starting movement test");
+                    DebugLogger.LogDebug("[DeviceAimbotTest] Starting movement test");
 
                     // Right
                     Device.move(step, 0);
@@ -454,7 +454,7 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
                         System.Threading.Thread.Sleep(100);
                     }
 
-                    DebugLogger.LogDebug("[MakcuTest] Movement test complete");
+                    DebugLogger.LogDebug("[DeviceAimbotTest] Movement test complete");
                 });
 
                 System.Windows.MessageBox.Show(
@@ -474,7 +474,7 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
                     "Test Move",
                     System.Windows.MessageBoxButton.OK,
                     System.Windows.MessageBoxImage.Error);
-                DebugLogger.LogDebug($"[MakcuTest] Error: {ex}");
+                DebugLogger.LogDebug($"[DeviceAimbotTest] Error: {ex}");
             }
             finally
             {

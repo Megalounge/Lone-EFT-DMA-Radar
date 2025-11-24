@@ -6,19 +6,15 @@ namespace SDK
     public readonly partial struct Offsets
     {
         public readonly partial struct GameWorld
-        {
-            public const uint Location = 0xB8; // String
-        }
-
-        public readonly partial struct ClientLocalGameWorld
-        {
-            public const uint BtrController = 0x20; // -.\uF07E
-            public const uint LootList = 0x178; // System.Collections.Generic.List<\uE311>
-            public const uint RegisteredPlayers = 0x190; // System.Collections.Generic.List<IPlayer>
-            public const uint MainPlayer = 0x1E0; // EFT.Player
-            public const uint SynchronizableObjectLogicProcessor = 0x218; // -.\uEBD9
-            public const uint Grenades = 0x258; // -.\uE3D7<Int32, Throwable>
-        }
+		{
+			public const uint BtrController = 0x20; // EFT.Vehicle.BtrController
+			public const uint LocationId = 0xB8; // string
+			public const uint LootList = 0x178; // System.Collections.Generic.List<IKillable>
+			public const uint RegisteredPlayers = 0x190; // System.Collections.Generic.List<IPlayer>
+			public const uint MainPlayer = 0x1E0; // EFT.Player
+			public const uint SynchronizableObjectLogicProcessor = 0x218; // EFT.SynchronizableObjects.SynchronizableObjectLogicProcessor
+			public const uint Grenades = 0x258; // DictionaryListHydra<int, Throwable>
+		}
 
         public readonly partial struct SynchronizableObject
         {
@@ -52,9 +48,9 @@ namespace SDK
             public const uint AttachedBot = 0x60; // System.ValueTuple<ObservedPlayerView, Boolean>
         }
 
-        public readonly partial struct Grenade
+        public readonly partial struct Throwable
         {
-            public const uint IsDestroyed = 0x4D; // Boolean
+            public const uint _isDestroyed  = 0x4D; // Boolean
         }
 
         public readonly partial struct Player
@@ -62,24 +58,23 @@ namespace SDK
             public const uint MovementContext = 0x60; // EFT.MovementContext
             public const uint _playerBody = 0x190; // EFT.PlayerBody
             public const uint Physical = 0x8F0; // -.\uE399 <Physical> Physical
-            public const uint Corpse = 0x640; // EFT.Interactive.Corpse
+            public const uint Corpse = 0x670; // EFT.Interactive.Corpse
             public const uint Location = 0x860; // String
             public const uint Profile = 0x8D8; // EFT.Profile
             public const uint ProceduralWeaponAnimation = 0x330; // EFT.Animations.ProceduralWeaponAnimation
-            public const uint HandsController = 0x958; // EFT.Player.AbstractHandsController
             public const uint _inventoryController = 0x950; // EFT.PlayerInventoryController update
             public const uint _handsController = 0x958; // EFT.PlayerHands update
         }
 
         public readonly partial struct ObservedPlayerView
         {
-            public const uint GroupID = 0x78; // String
-            public const uint AccountId = 0xB0; // String
-            public const uint PlayerBody = 0xC8; // EFT.PlayerBody
-            public const uint ObservedPlayerController = 0x20; // -.\uED46
-            public const uint Voice = 0x38; // String
-            public const uint Side = 0x8C; // System.Int32
-            public const uint IsAI = 0x98; // Boolean
+			public const uint ObservedPlayerController = 0x20; // EFT.NextObservedPlayer.ObservedPlayerController
+			public const uint Voice = 0x38; // string
+			public const uint GroupID = 0x78; // string
+			public const uint Side = 0x8C; // EFT.EPlayerSide
+			public const uint IsAI = 0x98; // bool
+			public const uint AccountId = 0xB0; // string
+			public const uint PlayerBody = 0xC8; // EFT.PlayerBody
         }
 
         public readonly partial struct ObservedPlayerController
@@ -183,10 +178,6 @@ namespace SDK
         {
             public const uint SkeletonRootJoint = 0x30; // Diz.Skinning.Skeleton
         }
-
-
-
-
 
         public readonly partial struct FirearmController
         {

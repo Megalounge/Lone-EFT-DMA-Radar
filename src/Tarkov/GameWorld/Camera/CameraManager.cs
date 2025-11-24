@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Lone EFT DMA Radar
  * MIT License - Copyright (c) 2025 Lone DMA
  */
@@ -343,6 +343,7 @@ public void OnRealtimeLoop(VmmScatter scatter, LocalPlayer localPlayer)
                 if (s.ReadValue<Matrix4x4>(activeMatrixAddress + UnitySDK.UnityOffsets.Camera_ViewMatrixOffset, out var vm))
                 {
                     _viewMatrix.Update(ref vm);
+                    _lastMatrixUpdate = DateTime.UtcNow;
                 }
 
                 if (s.ReadValue<float>(FPSCamera + UnitySDK.UnityOffsets.Camera_FOVOffset, out var fov))
@@ -443,6 +444,7 @@ public static float ZoomLevel => _zoomLevel;
         private static float _aspect;
         private static readonly ViewMatrix _viewMatrix = new();
         public static Vector3 CameraPosition => new(_viewMatrix.M14, _viewMatrix.M24, _viewMatrix.Translation.Z);
+        private static DateTime _lastMatrixUpdate = DateTime.MinValue;
 
         public static void Reset()
         {
@@ -453,15 +455,25 @@ public static float ZoomLevel => _zoomLevel;
             EspRunning = false;
             _fov = 0f;
             _aspect = 0f;
+            _lastMatrixUpdate = DateTime.MinValue;
         }
+
+        // Indicates if we have a recent, valid matrix update
+        public bool IsInitialized => _lastMatrixUpdate != DateTime.MinValue &&
+                                     (DateTime.UtcNow - _lastMatrixUpdate).TotalSeconds < 5.0;
 
 public static void UpdateViewportRes()
 {
     lock (_viewportSync)
     {
-        // ✅ FIX: Use actual configured resolution instead of hardcoded 1080p
-        var width = (int)App.Config.UI.Resolution.Width;
-        var height = (int)App.Config.UI.Resolution.Height;
+        // Prefer explicit ESP window override so the overlay can run on a different resolution/monitor.
+        // Falls back to the generic UI resolution, then to primary monitor.
+        var width = App.Config.UI.EspScreenWidth > 0
+            ? App.Config.UI.EspScreenWidth
+            : (int)App.Config.UI.Resolution.Width;
+        var height = App.Config.UI.EspScreenHeight > 0
+            ? App.Config.UI.EspScreenHeight
+            : (int)App.Config.UI.Resolution.Height;
         
         // Fallback to 1080p if invalid
         if (width <= 0 || height <= 0)

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Lone EFT DMA Radar
  * Brought to you by Lone (Lone DMA)
  * 
@@ -91,8 +91,8 @@ namespace LoneEftDmaRadar
             toggleShowFood.HotkeyStateChanged += ToggleShowFood_HotkeyStateChanged;
             var toggleShowMeds = new HotkeyActionController("Toggle Show Meds");
             toggleShowMeds.HotkeyStateChanged += ToggleShowMeds_HotkeyStateChanged;
-            var engageAimbotMakcu = new HotkeyActionController("Engage Aimbot");
-            engageAimbotMakcu.HotkeyStateChanged += EngageAimbotMakcu_HotkeyStateChanged;
+            var engageAimbotDeviceAimbot = new HotkeyActionController("Engage Aimbot");
+            engageAimbotDeviceAimbot.HotkeyStateChanged += EngageAimbotDeviceAimbot_HotkeyStateChanged;
             
             var toggleESP = new HotkeyActionController("Toggle ESP Overlay");
             toggleESP.HotkeyStateChanged += ToggleESP_HotkeyStateChanged;
@@ -119,7 +119,7 @@ namespace LoneEftDmaRadar
             HotkeyAction.RegisterController(toggleESPScavs);
             HotkeyAction.RegisterController(toggleESPLoot);
             HotkeyAction.RegisterController(toggleESPExfils);
-            HotkeyAction.RegisterController(engageAimbotMakcu);
+            HotkeyAction.RegisterController(engageAimbotDeviceAimbot);
         }
 
         private void ToggleAimviewWidget_HotkeyStateChanged(object sender, HotkeyEventArgs e)
@@ -136,11 +136,11 @@ namespace LoneEftDmaRadar
             }
         }
 
-        private void EngageAimbotMakcu_HotkeyStateChanged(object sender, HotkeyEventArgs e)
+        private void EngageAimbotDeviceAimbot_HotkeyStateChanged(object sender, HotkeyEventArgs e)
         {
-            if (_parent.Makcu?.ViewModel is MakcuViewModel makcuAim)
+            if (_parent.DeviceAimbot?.ViewModel is DeviceAimbotViewModel DeviceAimbotAim)
             {
-                makcuAim.IsEngaged = e.State;
+                DeviceAimbotAim.IsEngaged = e.State;
             }
         }
 

@@ -4,9 +4,11 @@
  */
 
 using LoneEftDmaRadar.UI.Misc;
+using LoneEftDmaRadar.Tarkov.Unity.Structures;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Collections.Generic;
 
 namespace LoneEftDmaRadar.UI.Radar.ViewModels
 {
@@ -94,6 +96,26 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
             set
             {
                 App.Config.MemWrites.MemoryAimEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public List<Bones> AvailableBones { get; } = new()
+        {
+            Bones.HumanHead,
+            Bones.HumanNeck,
+            Bones.HumanSpine3,
+            Bones.HumanSpine2,
+            Bones.HumanPelvis,
+            Bones.Closest
+        };
+
+        public Bones MemoryAimTargetBone
+        {
+            get => App.Config.MemWrites.MemoryAimTargetBone;
+            set
+            {
+                App.Config.MemWrites.MemoryAimTargetBone = value;
                 OnPropertyChanged();
             }
         }

@@ -31,7 +31,7 @@ namespace LoneEftDmaRadar.Tarkov.Features.MemWrites
         protected override TimeSpan Delay => TimeSpan.FromMilliseconds(1);
 
         /// <summary>
-        /// Set whether aim key is currently held. Called by MakcuAimbot.
+        /// Set whether aim key is currently held. Called by DeviceAimbot.
         /// </summary>
         public void SetEngaged(bool engaged)
         {
@@ -43,7 +43,7 @@ namespace LoneEftDmaRadar.Tarkov.Features.MemWrites
         }
 
         /// <summary>
-        /// Set the target position to aim at. Called by MakcuAimbot.
+        /// Set the target position to aim at. Called by DeviceAimbot.
         /// </summary>
         public void SetTargetPosition(Vector3? targetPos)
         {
@@ -83,7 +83,7 @@ namespace LoneEftDmaRadar.Tarkov.Features.MemWrites
                 DebugLogger.LogDebug("[MemoryAim] Applying aim");
                 ApplyMemoryAim(localPlayer, _targetPosition.Value);
                 
-                // Clear target after writing (will be set again next frame by MakcuAimbot if still aiming)
+                // Clear target after writing (will be set again next frame by DeviceAimbot if still aiming)
                 _targetPosition = null;
             }
             catch (Exception ex)

@@ -5,14 +5,14 @@ using System.Windows.Data;
 
 namespace LoneEftDmaRadar.UI.Radar.Views
 {
-    public partial class MakcuTab : UserControl
+    public partial class DeviceAimbotTab : UserControl
     {
-        public MakcuViewModel ViewModel { get; }
+        public DeviceAimbotViewModel ViewModel { get; }
 
-        public MakcuTab()
+        public DeviceAimbotTab()
         {
             InitializeComponent();
-            DataContext = ViewModel = new MakcuViewModel();
+            DataContext = ViewModel = new DeviceAimbotViewModel();
         }
     } 
 }

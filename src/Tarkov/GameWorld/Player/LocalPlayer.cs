@@ -95,7 +95,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
         {
             try
             {
-                HandsController = Memory.ReadPtr(Base + Offsets.Player.HandsController, false);
+                HandsController = Memory.ReadPtr(Base + Offsets.Player._handsController, false);
                 FirearmManager?.Update();
             }
             catch (Exception ex)

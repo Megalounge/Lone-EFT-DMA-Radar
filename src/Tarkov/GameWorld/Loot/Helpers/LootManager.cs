@@ -116,7 +116,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Loot.Helpers
         /// </summary>
         private void GetLoot(CancellationToken ct)
         {
-            var lootListAddr = Memory.ReadPtr(_lgw + Offsets.ClientLocalGameWorld.LootList);
+            var lootListAddr = Memory.ReadPtr(_lgw + Offsets.GameWorld.LootList);
             using var lootList = MonoList<ulong>.Create(
                 addr: lootListAddr,
                 useCache: true);

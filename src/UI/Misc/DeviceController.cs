@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace LoneEftDmaRadar.UI.Misc
 {
-    public enum MakcuMouseButton : int
+    public enum DeviceAimbotMouseButton : int
     {
         Left = 1,
         Right = 2,
@@ -25,7 +25,7 @@ namespace LoneEftDmaRadar.UI.Misc
     public enum KmDeviceKind
     {
         Unknown = 0,
-        Makcu   = 1,
+        DeviceAimbot   = 1,
         Generic = 2   // KMBox / CH340 / any km.* at 115200
     }
 
@@ -33,31 +33,31 @@ namespace LoneEftDmaRadar.UI.Misc
     public class Device
     {
         // --- gating for device smooth/bezier so we don't overlap commands ---
-        private long _makcuBusyUntilTicks;             // when it's safe to send the next smooth/bezier
+        private long _DeviceAimbotBusyUntilTicks;             // when it's safe to send the next smooth/bezier
         private static readonly double _ticksPerMs = (double)Stopwatch.Frequency / 1000.0;
 
         // You can tune this if your firmware runs ~2�C4ms per segment
-        private const int MakcuSegmentMsDefault = 3;
+        private const int DeviceAimbotSegmentMsDefault = 3;
 
         // Optional: expose via config if you want
-        private static int GetSegmentMs() => MakcuSegmentMsDefault;
+        private static int GetSegmentMs() => DeviceAimbotSegmentMsDefault;
 
         // Optional: enable Bezier from config if you add a toggle later.
         // For now: try Bezier when segments > 1.
         private static bool UseBezierForSmoothing => true;
 
-        #region Makcu Identity (edit if needed)
-        private const string MAKCU_FRIENDLY_NAME = "USB-Enhanced-SERIAL CH343";
-        private const string MAKCU_VID = "1A86";
-        private const string MAKCU_PID = "55D3";
-        private const string MAKCU_SERIAL_FRAGMENT = "58A6074578"; // optional; helps if multiple adapters
-        private const string MAKCU_EXPECT_SIGNATURE = "km.MAKCU";
+        #region DeviceAimbot Identity (edit if needed)
+        private const string DeviceAimbot_FRIENDLY_NAME = "USB-Enhanced-SERIAL CH343";
+        private const string DeviceAimbot_VID = "1A86";
+        private const string DeviceAimbot_PID = "55D3";
+        private const string DeviceAimbot_SERIAL_FRAGMENT = "58A6074578"; // optional; helps if multiple adapters
+        private const string DeviceAimbot_EXPECT_SIGNATURE = "km.DeviceAimbot";
         #endregion
 
         #region Fields / State
 
         /// <summary>
-        /// What kind of km.* device is currently connected (Makcu vs Generic).
+        /// What kind of km.* device is currently connected (DeviceAimbot vs Generic).
         /// </summary>
         public static KmDeviceKind DeviceKind { get; private set; } = KmDeviceKind.Unknown;
 
@@ -81,26 +81,26 @@ namespace LoneEftDmaRadar.UI.Misc
 
         private static readonly Random r = new Random();
         private const int DEFAULT_OPEN_BAUD = 115200;   // initial open
-        private const int HIGH_BAUD = 4000000;          // Makcu high speed
+        private const int HIGH_BAUD = 4000000;          // DeviceAimbot high speed
         #endregion
 
         #region Auto-Connect Helpers (VID/PID/Name + Signature Check)
         /// <summary>
         /// One-shot: find COM port by VID/PID or friendly name (with optional serial fragment),
-        /// connect via your existing flow, and verify "km.MAKCU".
+        /// connect via your existing flow, and verify "km.DeviceAimbot".
         /// </summary>
-        public static bool AutoConnectMakcu()
+        public static bool AutoConnectDeviceAimbot()
         {
             try
             {
                 DeviceKind = KmDeviceKind.Unknown;
                 string com =
-                    TryGetComByVidPid(MAKCU_VID, MAKCU_PID, MAKCU_SERIAL_FRAGMENT)
-                    ?? TryGetComByFriendlyName(MAKCU_FRIENDLY_NAME, MAKCU_SERIAL_FRAGMENT);
+                    TryGetComByVidPid(DeviceAimbot_VID, DeviceAimbot_PID, DeviceAimbot_SERIAL_FRAGMENT)
+                    ?? TryGetComByFriendlyName(DeviceAimbot_FRIENDLY_NAME, DeviceAimbot_SERIAL_FRAGMENT);
 
                 if (string.IsNullOrEmpty(com))
                 {
-                    DebugLogger.LogDebug("[-] Makcu device not found via VID/PID or friendly name.");
+                    DebugLogger.LogDebug("[-] DeviceAimbot device not found via VID/PID or friendly name.");
                     return false;
                 }
 
@@ -108,32 +108,32 @@ namespace LoneEftDmaRadar.UI.Misc
 
                 if (!connected)
                 {
-                    DebugLogger.LogDebug("[-] Failed to open Makcu serial port.");
+                    DebugLogger.LogDebug("[-] Failed to open DeviceAimbot serial port.");
                     DeviceKind = KmDeviceKind.Unknown;
                     return false;
                 }
 
-                if (!ValidateMakcuSignature())
+                if (!ValidateDeviceAimbotSignature())
                 {
-                    DebugLogger.LogDebug("[-] Device did not return expected signature (km.MAKCU).");
+                    DebugLogger.LogDebug("[-] Device did not return expected signature (km.DeviceAimbot).");
                     disconnect();
                     DeviceKind = KmDeviceKind.Unknown;
                     return false;
                 }
 
-                DeviceKind = KmDeviceKind.Makcu;
-                DebugLogger.LogDebug("[+] Makcu connected and verified.");
+                DeviceKind = KmDeviceKind.DeviceAimbot;
+                DebugLogger.LogDebug("[+] DeviceAimbot connected and verified.");
                 return true;
             }
             catch (Exception ex)
             {
                 DeviceKind = KmDeviceKind.Unknown;
-                DebugLogger.LogDebug($"[-] AutoConnectMakcu error: {ex}");
+                DebugLogger.LogDebug($"[-] AutoConnectDeviceAimbot error: {ex}");
                 return false;
             }
         }
 
-        private static bool ValidateMakcuSignature(int timeoutMs = 800)
+        private static bool ValidateDeviceAimbotSignature(int timeoutMs = 800)
         {
             try
             {
@@ -156,8 +156,8 @@ namespace LoneEftDmaRadar.UI.Misc
                     return false;
 
                 // Accept starts-with or contains to be tolerant of echoes
-                bool ok = line.StartsWith(MAKCU_EXPECT_SIGNATURE, StringComparison.OrdinalIgnoreCase)
-                       || line.Contains(MAKCU_EXPECT_SIGNATURE, StringComparison.OrdinalIgnoreCase);
+                bool ok = line.StartsWith(DeviceAimbot_EXPECT_SIGNATURE, StringComparison.OrdinalIgnoreCase)
+                       || line.Contains(DeviceAimbot_EXPECT_SIGNATURE, StringComparison.OrdinalIgnoreCase);
 
                 if (ok) version = line; // keep your cache in sync
                 return ok;
@@ -288,7 +288,7 @@ namespace LoneEftDmaRadar.UI.Misc
         /// <summary>
         /// Best-effort auto-connect using (in order):
         /// 1) Previously saved COM port
-        /// 2) VID/PID friendly-name probe (Makcu)
+        /// 2) VID/PID friendly-name probe (DeviceAimbot)
         /// 3) Iterate all COM ports (generic fallback)
         /// </summary>
         public static bool TryAutoConnect(string lastComPort = null)
@@ -300,18 +300,18 @@ namespace LoneEftDmaRadar.UI.Misc
             {
                 if (!string.IsNullOrWhiteSpace(lastComPort))
                 {
-                    DebugLogger.LogDebug($"[Makcu] AutoConnect: trying saved port {lastComPort}");
+                    DebugLogger.LogDebug($"[DeviceAimbot] AutoConnect: trying saved port {lastComPort}");
                     if (ConnectAuto(lastComPort))
                         return true;
                 }
             }
             catch (Exception ex)
             {
-                DebugLogger.LogDebug($"[Makcu] AutoConnect saved port failed: {ex.Message}");
+                DebugLogger.LogDebug($"[DeviceAimbot] AutoConnect saved port failed: {ex.Message}");
             }
 
             // Try VID/PID detection
-            if (AutoConnectMakcu())
+            if (AutoConnectDeviceAimbot())
                 return true;
 
             // Try all enumerated COM ports as a last resort
@@ -319,7 +319,7 @@ namespace LoneEftDmaRadar.UI.Misc
             {
                 try
                 {
-                    DebugLogger.LogDebug($"[Makcu] AutoConnect: probing {dev.Port} ({dev.Description})");
+                    DebugLogger.LogDebug($"[DeviceAimbot] AutoConnect: probing {dev.Port} ({dev.Description})");
                     if (ConnectAuto(dev.Port))
                         return true;
                 }
@@ -396,8 +396,8 @@ namespace LoneEftDmaRadar.UI.Misc
         #region Connect / Disconnect / Reconnect
 
         /// <summary>
-        /// Original Makcu-specific connect.
-        /// IMPORTANT: left unchanged, so Makcu path stays working.
+        /// Original DeviceAimbot-specific connect.
+        /// IMPORTANT: left unchanged, so DeviceAimbot path stays working.
         /// </summary>
         public static void connect(string com)
         {
@@ -532,10 +532,10 @@ namespace LoneEftDmaRadar.UI.Misc
         }
 
         /// <summary>
-        /// Try Makcu handshake on a specific COM.
+        /// Try DeviceAimbot handshake on a specific COM.
         /// Uses your existing connect(), then validates signature.
         /// </summary>
-        public static bool TryConnectMakcuOnPort(string com)
+        public static bool TryConnectDeviceAimbotOnPort(string com)
         {
             DeviceKind = KmDeviceKind.Unknown;
             connected = false;
@@ -545,15 +545,15 @@ namespace LoneEftDmaRadar.UI.Misc
             if (!connected)
                 return false;
 
-            if (!ValidateMakcuSignature())
+            if (!ValidateDeviceAimbotSignature())
             {
-                DebugLogger.LogDebug($"[-] {com}: not a Makcu (km.MAKCU signature missing).");
+                DebugLogger.LogDebug($"[-] {com}: not a DeviceAimbot (km.DeviceAimbot signature missing).");
                 disconnect();
                 return false;
             }
 
-            DeviceKind = KmDeviceKind.Makcu;
-            DebugLogger.LogDebug($"[+] {com}: Makcu validated via km.MAKCU signature.");
+            DeviceKind = KmDeviceKind.DeviceAimbot;
+            DebugLogger.LogDebug($"[+] {com}: DeviceAimbot validated via km.DeviceAimbot signature.");
             return true;
         }
 
@@ -605,7 +605,7 @@ namespace LoneEftDmaRadar.UI.Misc
                     version = string.Empty;
                 }
 
-                // Enable button stream + disable echo (same as Makcu)
+                // Enable button stream + disable echo (same as DeviceAimbot)
                 try
                 {
                     port.Write("km.buttons(1)\r\n");
@@ -646,13 +646,13 @@ namespace LoneEftDmaRadar.UI.Misc
 
         /// <summary>
         /// Auto connect on a specific COM:
-        /// 1) Try Makcu handshake (change_cmd + 4M + km.MAKCU signature)
+        /// 1) Try DeviceAimbot handshake (change_cmd + 4M + km.DeviceAimbot signature)
         /// 2) If that fails, fall back to generic km.* at 115200
         /// </summary>
         public static bool ConnectAuto(string com)
         {
-            // First try Makcu, which uses your existing connect()
-            if (TryConnectMakcuOnPort(com))
+            // First try DeviceAimbot, which uses your existing connect()
+            if (TryConnectDeviceAimbotOnPort(com))
                 return true;
 
             // If that fails, try generic km.* (KMBox, etc.)
@@ -760,7 +760,7 @@ namespace LoneEftDmaRadar.UI.Misc
             Thread.Sleep(ms_delay);
         }
 
-        public static void press(MakcuMouseButton button, int press)
+        public static void press(DeviceAimbotMouseButton button, int press)
         {
             if (!connected) return;
             string cmd = $"km.{MouseButtonToString(button)}({press})\r";
@@ -784,7 +784,7 @@ namespace LoneEftDmaRadar.UI.Misc
             button_inputs = new Thread(read_buttons)
             {
                 IsBackground = true,
-                Name = "MakcuButtonListener"
+                Name = "DeviceAimbotButtonListener"
             };
             button_inputs.Start();
         }
@@ -836,23 +836,23 @@ namespace LoneEftDmaRadar.UI.Misc
         #endregion
 
         #region Button Helpers / Locks
-        public static bool button_pressed(MakcuMouseButton button)
+        public static bool button_pressed(DeviceAimbotMouseButton button)
         {
             if (!connected || bState == null) return false;
             return bState.TryGetValue((int)button, out bool state) && state;
         }
 
-        public static async void lock_button(MakcuMouseButton button, int bit)
+        public static async void lock_button(DeviceAimbotMouseButton button, int bit)
         {
             if (!connected) return;
 
             string cmd = button switch
             {
-                MakcuMouseButton.Left   => $"km.lock_ml({bit})\r",
-                MakcuMouseButton.Right  => $"km.lock_mr({bit})\r",
-                MakcuMouseButton.Middle => $"km.lock_mm({bit})\r",
-                MakcuMouseButton.mouse4 => $"km.lock_ms1({bit})\r",
-                MakcuMouseButton.mouse5 => $"km.lock_ms2({bit})\r",
+                DeviceAimbotMouseButton.Left   => $"km.lock_ml({bit})\r",
+                DeviceAimbotMouseButton.Right  => $"km.lock_mr({bit})\r",
+                DeviceAimbotMouseButton.Middle => $"km.lock_mm({bit})\r",
+                DeviceAimbotMouseButton.mouse4 => $"km.lock_ms1({bit})\r",
+                DeviceAimbotMouseButton.mouse5 => $"km.lock_ms2({bit})\r",
                 _ => $"km.lock_ml({bit})\r"
             };
 
@@ -861,18 +861,18 @@ namespace LoneEftDmaRadar.UI.Misc
             await port.BaseStream.FlushAsync();
         }
 
-        public static int MouseButtonToInt(MakcuMouseButton button) => (int)button;
-        public static MakcuMouseButton IntToMouseButton(int button) => (MakcuMouseButton)button;
+        public static int MouseButtonToInt(DeviceAimbotMouseButton button) => (int)button;
+        public static DeviceAimbotMouseButton IntToMouseButton(int button) => (DeviceAimbotMouseButton)button;
 
-        public static string MouseButtonToString(MakcuMouseButton button)
+        public static string MouseButtonToString(DeviceAimbotMouseButton button)
         {
             return button switch
             {
-                MakcuMouseButton.Left   => "left",
-                MakcuMouseButton.Right  => "right",
-                MakcuMouseButton.Middle => "middle",
-                MakcuMouseButton.mouse4 => "ms1",
-                MakcuMouseButton.mouse5 => "ms2",
+                DeviceAimbotMouseButton.Left   => "left",
+                DeviceAimbotMouseButton.Right  => "right",
+                DeviceAimbotMouseButton.Middle => "middle",
+                DeviceAimbotMouseButton.mouse4 => "ms1",
+                DeviceAimbotMouseButton.mouse5 => "ms2",
                 _ => "left"
             };
         }
