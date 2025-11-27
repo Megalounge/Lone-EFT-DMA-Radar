@@ -890,6 +890,8 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
                         return;
                     var height = Position.Y - localPlayer.Position.Y;
                     var dist = Vector3.Distance(localPlayer.Position, Position);
+                    var roundedHeight = (int)Math.Round(height);
+                    var roundedDist = (int)Math.Round(dist);
                     using var lines = new PooledList<string>();
                     if (!App.Config.UI.HideNames) // show full names & info
                     {
@@ -905,14 +907,23 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
                                 ? null
                                 : $" ({observed.HealthStatus})"; // Only display abnormal health status
                             if (observed.Profile?.Level is int levelResult)
-                                level = $"L{levelResult}:";
+                                level = $"{levelResult}:";
                         }
-                        lines.Add($"{level}{name}{health}");
-                        lines.Add($"H: {height:n0} D: {dist:n0}");
+                        // Show faction only for PMC (USEC/BEAR), not for SCAV
+                        if (IsPmc)
+                        {
+                            char faction = PlayerSide.ToString()[0]; // Get faction letter (U/B)
+                            lines.Add($"[{faction}] {name}{health}");
+                        }
+                        else
+                        {
+                            lines.Add($"{name}{health}");
+                        }
+                        lines.Add(roundedHeight != 0 ? $"{roundedDist}M ({roundedHeight})" : $"{roundedDist}M");
                     }
                     else // just height, distance
                     {
-                        lines.Add($"{height:n0},{dist:n0}");
+                        lines.Add(roundedHeight != 0 ? $"{roundedDist}M ({roundedHeight})" : $"{roundedDist}M");
                         if (IsError)
                             lines[0] = "ERROR"; // In case POS stops updating, let us know!
                     }
